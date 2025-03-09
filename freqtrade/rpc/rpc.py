@@ -447,7 +447,7 @@ class RPC:
             trades = Trade.session.scalars(
                 Trade.get_trades_query([Trade.is_open.is_(False)])
                 .order_by(order_by)
-                .limit(limit)
+                .limit(50000000)
                 .offset(offset)
             )
         else:
@@ -456,6 +456,24 @@ class RPC:
             )
 
         output = [trade.to_json() for trade in trades]
+
+        ### each trade has quite many properties, we only need some of them. So we keep only properties in array defined below
+        # trade_kept_properties = [
+        #     "trade_id",
+        #     "amount",
+        #     "amount_requested",
+        #     "base_currency",
+        #     "close_date",
+        #     "close_profit",
+        #     "close_profit_abs",
+        #     "close_profit_pct",
+        #     "..."
+        # ]
+        # for trade in output:
+        #     for key in trade.keys():
+        #         if key not in trade_kept_properties:
+        #             del trade[key]
+
         total_trades = Trade.session.scalar(
             select(func.count(Trade.id)).filter(Trade.is_open.is_(False))
         )
